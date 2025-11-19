@@ -1,0 +1,37 @@
+{
+  "name": "TS Space Tool - P2P Sharing",
+  "short_name": "TS Space",
+  "description": "Securely share text and files directly between devices. No servers, no accounts, no history.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1'/><stop offset='100%25' style='stop-color:%231d4ed8;stop-opacity:1'/></linearGradient></defs><rect width='192' height='192' fill='url(%23grad)' rx='42'/><text x='96' y='125' font-family='Arial,sans-serif' font-size='92' font-weight='bold' fill='white' text-anchor='middle'>TS</text><circle cx='144' cy='48' r='23' fill='%2310b981'/><path d='M144 38 L144 58 M134 48 L154 48' stroke='white' stroke-width='5' stroke-linecap='round'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1'/><stop offset='100%25' style='stop-color:%231d4ed8;stop-opacity:1'/></linearGradient></defs><rect width='512' height='512' fill='url(%23grad)' rx='112'/><text x='256' y='335' font-family='Arial,sans-serif' font-size='245' font-weight='bold' fill='white' text-anchor='middle'>TS</text><circle cx='384' cy='128' r='61' fill='%2310b981'/><path d='M384 101 L384 155 M357 128 L411 128' stroke='white' stroke-width='13' stroke-linecap='round'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity"],
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect width='540' height='720' fill='%23f9fafb'/><text x='270' y='360' text-anchor='middle' font-size='24' fill='%232563eb'>TS Space Tool</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ]
+}

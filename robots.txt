@@ -1,0 +1,10 @@
+# Robots.txt for TS Space Tool
+
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://ts-space-tool.netlify.app/sitemap.xml
+
+# Crawl-delay (optional, helps prevent server overload)
+Crawl-delay: 1

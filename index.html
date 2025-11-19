@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TS Space Tool - Instant P2P File & Text Sharing | No Login Required</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Share files and text instantly between devices using peer-to-peer technology. No registration, no servers, completely private. Works on WiFi and mobile data. Free secure P2P sharing tool.">
+    <meta name="keywords" content="p2p sharing, file transfer, text sharing, peer to peer, secure file sharing, no login, private sharing, instant share, cross platform, wifi transfer, mobile data transfer, WebRTC, QR code sharing">
+    <meta name="author" content="Asif Rabetul">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+    <meta name="rating" content="general">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ts-space-tool.netlify.app/">
+    <meta property="og:title" content="TS Space Tool - Instant P2P File & Text Sharing">
+    <meta property="og:description" content="Share files and text instantly between devices using peer-to-peer technology. No registration, no servers, completely private.">
+    <meta property="og:image" content="https://ts-space-tool.netlify.app/og-image.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://ts-space-tool.netlify.app/">
+    <meta property="twitter:title" content="TS Space Tool - Instant P2P File & Text Sharing">
+    <meta property="twitter:description" content="Share files and text instantly between devices using peer-to-peer technology. No registration, no servers, completely private.">
+    <meta property="twitter:image" content="https://ts-space-tool.netlify.app/og-image.png">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://ts-space-tool.netlify.app/">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TS Space">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1'/><stop offset='100%25' style='stop-color:%231d4ed8;stop-opacity:1'/></linearGradient></defs><rect width='100' height='100' fill='url(%23grad)' rx='22'/><text x='50' y='65' font-family='Arial,sans-serif' font-size='48' font-weight='bold' fill='white' text-anchor='middle'>TS</text><circle cx='75' cy='25' r='12' fill='%2310b981'/><path d='M75 20 L75 30 M70 25 L80 25' stroke='white' stroke-width='2.5' stroke-linecap='round'/></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1'/><stop offset='100%25' style='stop-color:%231d4ed8;stop-opacity:1'/></linearGradient></defs><rect width='100' height='100' fill='url(%23grad)' rx='22'/><text x='50' y='65' font-family='Arial,sans-serif' font-size='48' font-weight='bold' fill='white' text-anchor='middle'>TS</text><circle cx='75' cy='25' r='12' fill='%2310b981'/><path d='M75 20 L75 30 M70 25 L80 25' stroke='white' stroke-width='2.5' stroke-linecap='round'/></svg>">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <!-- PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- HTML5-QRCode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
+    <style>
+        /* Custom Scrollbar for Chat */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .drag-active {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        /* Prevent horizontal scrolling and dragging */
+        body, html {
+            overflow-x: hidden;
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+        }
+        body {
+            touch-action: pan-y;
+        }
+        main {
+            overflow-x: hidden;
+        }
+        /* Fix text overflow for long continuous text */
+        .message-bubble {
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+        /* Ensure no horizontal overflow in chat container */
+        #chatContainer {
+            overflow-x: hidden;
+        }
+        /* Connection status styles */
+        .connection-status {
+            transition: all 0.3s ease;
+        }
+        /* Compact host view for PC */
+        .compact-host {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        @media (max-height: 700px) {
+            .compact-host {
+                padding-top: 1.5rem;
+                padding-bottom: 1.5rem;
+            }
+        }
+        /* QR Code Loading Animation */
+        .qr-loading {
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        .qr-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Cancel Button in QR Code */
+        .qr-cancel-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+        .qr-cancel-btn:hover {
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        /* Connection status animations */
+        .status-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* Mobile Input Box - Stick to Bottom like Messenger */
+        @media (max-width: 640px) {
+            #connectedView {
+                padding-bottom: 0 !important;
+            }
+            .mobile-input-area {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                border-top: 1px solid #e5e7eb;
+                padding: 0.75rem 1rem;
+                padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+                z-index: 100;
+                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            }
+            .mobile-chat-container {
+                padding-bottom: calc(70px + env(safe-area-inset-bottom)) !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 h-screen flex flex-col overflow-hidden font-sans">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 flex-none z-10">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 text-white p-1.5 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                </div>
+                <div class="flex flex-col">
+                    <h1 class="text-xl font-bold tracking-tight text-gray-900">TS space tool</h1>
+                    <p class="text-xs text-gray-500">Developed by Asif Rabetul</p>
+                </div>
+            </div>
+            <button id="endSessionBtn" class="hidden text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1 border border-red-200 rounded hover:bg-red-50 transition">
+                End Space
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 relative overflow-hidden flex flex-col max-w-5xl mx-auto w-full">
+        
+        <!-- View: Landing / Mode Selection -->
+        <div id="landingView" class="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8">
+            <div class="max-w-md space-y-4">
+                <h2 class="text-3xl font-bold text-gray-900">Instant P2P Sharing</h2>
+                <p class="text-gray-600">Securely share text and files directly between devices. No servers, no accounts, no history.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
+                <button id="createSpaceBtn" class="flex flex-col items-center justify-center p-6 bg-white border-2 border-blue-100 hover:border-blue-500 rounded-xl shadow-sm hover:shadow-md transition group">
+                    <div class="bg-blue-50 text-blue-600 p-4 rounded-full mb-3 group-hover:bg-blue-600 group-hover:text-white transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </div>
+                    <span class="font-semibold text-lg">Create Space</span>
+                    <span class="text-sm text-gray-500 mt-1">Generate QR Code</span>
+                </button>
+                
+                <button id="scanSpaceBtn" class="flex flex-col items-center justify-center p-6 bg-white border-2 border-purple-100 hover:border-purple-500 rounded-xl shadow-sm hover:shadow-md transition group">
+                    <div class="bg-purple-50 text-purple-600 p-4 rounded-full mb-3 group-hover:bg-purple-600 group-hover:text-white transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                    </div>
+                    <span class="font-semibold text-lg">Join Space</span>
+                    <span class="text-sm text-gray-500 mt-1">Scan QR Code</span>
+                </button>
+            </div>
+            
+            <!-- Join by ID Form -->
+            <div class="mt-8 w-full max-w-md">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    <p class="text-sm text-gray-600 mb-2">Or join by entering Space ID:</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="roomIdInput" placeholder="Enter Space ID" class="flex-1 bg-gray-100 border-0 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none">
+                        <button id="joinByIdBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition shadow-sm">
+                            Join
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Host Waiting -->
+        <div id="hostView" class="hidden flex-1 flex flex-col items-center p-6 pt-8 text-center compact-host overflow-y-auto">
+            <div class="w-full max-w-md mx-auto space-y-8">
+                <!-- QR Code Section with proper spacing -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center space-y-4 relative">
+                    <!-- Cancel Button in Top Right -->
+                    <button id="qrCancelBtn" class="qr-cancel-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Developer Credit with normal text size -->
+                    <div class="text-xs text-gray-500">
+                        Developed by Asif Rabetul
+                    </div>
+                    
+                    <!-- QR Code with good spacing -->
+                    <div id="qrcode" class="my-2">
+                        <!-- Loading placeholder -->
+                        <div class="qr-loading">
+                            <div class="qr-spinner"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Room URL -->
+                    <div class="flex items-center gap-2 w-full max-w-[260px] bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <p class="flex-1 text-xs text-gray-500 font-mono truncate text-left" id="roomUrlDisplay"></p>
+                        <button id="copyLinkBtn" class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition" title="Copy Link">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Section -->
+                <div class="space-y-6">
+                    <div class="space-y-3">
+                        <h3 class="text-xl font-semibold text-gray-900">Waiting for peer...</h3>
+                        <p class="text-gray-600">Scan this QR code or share the link to connect.</p>
+                        <div class="flex justify-center mt-2">
+                            <span class="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-blue-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                        </div>
+                    </div>
+
+                    <!-- Connection Tips -->
+                    <div id="connectionTips" class="text-xs text-gray-500 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <p class="font-medium text-blue-800 mb-2">💡 Connection Tips:</p>
+                        <ul class="space-y-1 text-left">
+                            <li class="flex items-start gap-2">
+                                <span class="text-blue-600 mt-0.5">•</span>
+                                <span>Ensure both devices have stable internet</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-blue-600 mt-0.5">•</span>
+                                <span>Try refreshing if connection takes too long</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-blue-600 mt-0.5">•</span>
+                                <span>Works across different networks</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Cancel Button -->
+                    <button id="cancelHostBtn" class="w-full max-w-xs mx-auto text-gray-600 hover:text-gray-800 hover:bg-gray-100 py-3 px-6 rounded-lg transition border border-gray-300 font-medium">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Scanner -->
+        <div id="scannerView" class="hidden flex-1 flex flex-col items-center justify-center p-4 bg-black">
+            <div id="reader" class="w-full max-w-sm bg-white rounded-lg overflow-hidden"></div>
+            <button id="cancelScanBtn" class="mt-6 text-white border border-white/30 px-6 py-3 rounded-full hover:bg-white/10 transition">Back</button>
+        </div>
+
+        <!-- View: Connecting -->
+        <div id="connectingView" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6">
+            <div class="space-y-4">
+                <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
+                <h3 class="text-xl font-semibold text-gray-900">Connecting...</h3>
+                <p class="text-gray-600" id="connectingStatus">Establishing secure P2P connection</p>
+                <div id="connectionProgress" class="text-xs text-gray-500 space-y-1">
+                    <div class="flex justify-between">
+                        <span>PeerJS Server:</span>
+                        <span id="peerjsStatus" class="text-orange-500 status-pulse">Connecting...</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Network Check:</span>
+                        <span id="stunStatus" class="text-orange-500 status-pulse">Checking...</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>P2P Connection:</span>
+                        <span id="p2pStatus" class="text-orange-500 status-pulse">Pending...</span>
+                    </div>
+                </div>
+            </div>
+            <button id="cancelConnectBtn" class="mt-8 text-gray-500 hover:text-gray-800 underline">Cancel</button>
+        </div>
+
+        <!-- View: Connected (Chat & Files) -->
+        <div id="connectedView" class="hidden flex-1 flex flex-col bg-white h-full">
+            <!-- Connection Status Bar -->
+            <div class="bg-green-50 border-b border-green-100 px-4 py-2 flex items-center justify-center text-xs font-medium text-green-700">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                Secure P2P Connection Established
+            </div>
+
+            <!-- Chat Area -->
+            <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 scrollbar-hide mobile-chat-container">
+                <!-- Welcome Message -->
+                <div class="flex justify-center">
+                    <div class="bg-blue-50 text-blue-800 text-xs px-3 py-1 rounded-full border border-blue-100 message-bubble">
+                        Space created. Messages are encrypted and not saved.
+                    </div>
+                </div>
+                <!-- Messages will be injected here -->
+            </div>
+
+            <!-- File Drop Overlay -->
+            <div id="dropOverlay" class="hidden absolute inset-0 bg-blue-500/10 backdrop-blur-sm border-4 border-blue-500 border-dashed z-50 flex items-center justify-center pointer-events-none">
+                <div class="bg-white p-6 rounded-xl shadow-xl text-blue-600 font-bold text-xl animate-bounce">
+                    Drop file to send
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 border-t border-gray-200 bg-white pb-20 sm:pb-4 mobile-input-area">
+                <!-- File Progress Area -->
+                <div id="fileProgressContainer" class="hidden mb-3 space-y-2">
+                    <!-- Dynamic progress bars -->
+                </div>
+
+                <form id="msgForm" class="flex gap-2 items-end">
+                    <label for="fileInput" class="cursor-pointer text-gray-400 hover:text-blue-600 p-3 rounded-lg hover:bg-blue-50 transition flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                        <input type="file" id="fileInput" class="hidden">
+                    </label>
+                    <div class="flex-1 relative">
+                        <input type="text" id="msgInput" class="w-full bg-gray-100 border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none" placeholder="Type a message...">
+                    </div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl transition shadow-sm flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed" id="sendBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Notifications / Toast -->
+    <div id="toastContainer" class="fixed bottom-32 sm:bottom-20 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none flex flex-col gap-2 w-max max-w-[90vw]"></div>
+
+    <script>
+        // --- Configuration ---
+        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
+        const CHUNK_SIZE = 16 * 1024; // 16 KB chunk
+        
+        // --- State ---
+        let peer = null;
+        let conn = null;
+        let myId = null;
+        let isHost = false;
+        let html5QrCode = null;
+        let currentRoomUrl = '';
+        let connectionTimeout = null;
+        let connectionRetryCount = 0;
+        const MAX_RETRIES = 3;
+        
+        // File Transfer State
+        let incomingFile = {
+            buffer: [],
+            receivedSize: 0,
+            meta: null,
+            active: false
+        };
+
+        // --- DOM Elements ---
+        const views = {
+            landing: document.getElementById('landingView'),
+            host: document.getElementById('hostView'),
+            scanner: document.getElementById('scannerView'),
+            connecting: document.getElementById('connectingView'),
+            connected: document.getElementById('connectedView')
+        };
+        
+        const ui = {
+            qrcode: document.getElementById('qrcode'),
+            roomUrlDisplay: document.getElementById('roomUrlDisplay'),
+            copyLinkBtn: document.getElementById('copyLinkBtn'),
+            chatContainer: document.getElementById('chatContainer'),
+            msgForm: document.getElementById('msgForm'),
+            msgInput: document.getElementById('msgInput'),
+            fileInput: document.getElementById('fileInput'),
+            fileProgressContainer: document.getElementById('fileProgressContainer'),
+            dropOverlay: document.getElementById('dropOverlay'),
+            endSessionBtn: document.getElementById('endSessionBtn'),
+            toastContainer: document.getElementById('toastContainer'),
+            roomIdInput: document.getElementById('roomIdInput'),
+            joinByIdBtn: document.getElementById('joinByIdBtn'),
+            connectingStatus: document.getElementById('connectingStatus'),
+            connectionProgress: document.getElementById('connectionProgress'),
+            peerjsStatus: document.getElementById('peerjsStatus'),
+            stunStatus: document.getElementById('stunStatus'),
+            p2pStatus: document.getElementById('p2pStatus'),
+            connectionTips: document.getElementById('connectionTips'),
+            qrCancelBtn: document.getElementById('qrCancelBtn')
+        };
+
+        // --- Enhanced STUN/TURN Configuration for Mobile Data ---
+        const ICE_SERVERS = [
+            // Google STUN servers (for basic NAT detection)
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            
+            // Twilio STUN (very reliable)
+            { urls: 'stun:global.stun.twilio.com:3478' },
+            
+            // ==== TURN SERVERS FOR MOBILE DATA ====
+            // Metered.ca - Free, reliable TURN servers (BEST for mobile data)
+            {
+                urls: 'turn:a.relay.metered.ca:80',
+                username: 'e4a89eece23212af526f1f7e',
+                credential: 'SqqHqVMpCVh+VzOa'
+            },
+            {
+                urls: 'turn:a.relay.metered.ca:80?transport=tcp',
+                username: 'e4a89eece23212af526f1f7e',
+                credential: 'SqqHqVMpCVh+VzOa'
+            },
+            {
+                urls: 'turn:a.relay.metered.ca:443',
+                username: 'e4a89eece23212af526f1f7e',
+                credential: 'SqqHqVMpCVh+VzOa'
+            },
+            {
+                urls: 'turn:a.relay.metered.ca:443?transport=tcp',
+                username: 'e4a89eece23212af526f1f7e',
+                credential: 'SqqHqVMpCVh+VzOa'
+            },
+            
+            // OpenRelay - Backup TURN servers
+            {
+                urls: 'turn:openrelay.metered.ca:80',
+                username: 'openrelayproject',
+                credential: 'openrelayproject'
+            },
+            {
+                urls: 'turn:openrelay.metered.ca:443',
+                username: 'openrelayproject',
+                credential: 'openrelayproject'
+            },
+            {
+                urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+                username: 'openrelayproject',
+                credential: 'openrelayproject'
+            },
+            
+            // Numb Viagenie - Additional backup
+            {
+                urls: 'turn:numb.viagenie.ca',
+                username: 'webrtc@live.com',
+                credential: 'muazkh'
+            }
+        ];
+
+        // --- Initialization ---
+        function init() {
+            setupEventListeners();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomId = urlParams.get('room');
+
+            if (roomId) {
+                console.log('Auto-joining room:', roomId);
+                showView('connecting');
+                updateConnectionStatus('Preparing to connect...');
+                setTimeout(() => joinSpace(roomId), 500);
+            } else {
+                showView('landing');
+            }
+        }
+
+        // --- Navigation ---
+        function showView(viewName) {
+            Object.values(views).forEach(el => el.classList.add('hidden'));
+            views[viewName].classList.remove('hidden');
+            
+            if (viewName === 'connected') {
+                ui.endSessionBtn.classList.remove('hidden');
+            } else {
+                ui.endSessionBtn.classList.add('hidden');
+            }
+        }
+
+        // --- Event Listeners ---
+        function setupEventListeners() {
+            document.getElementById('createSpaceBtn').addEventListener('click', createSpace);
+            document.getElementById('scanSpaceBtn').addEventListener('click', startScanner);
+            document.getElementById('cancelHostBtn').addEventListener('click', () => {
+                destroyPeer();
+                showView('landing');
+            });
+            document.getElementById('cancelScanBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                stopScanner();
+                showView('landing');
+            });
+            document.getElementById('cancelConnectBtn').addEventListener('click', () => {
+                destroyPeer();
+                showView('landing');
+            });
+            
+            ui.qrCancelBtn.addEventListener('click', () => {
+                destroyPeer();
+                showView('landing');
+            });
+            
+            ui.endSessionBtn.addEventListener('click', () => {
+                if(confirm('Are you sure you want to end this space? All data will be lost.')) {
+                    endSession();
+                }
+            });
+
+            ui.msgForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                sendText();
+            });
+
+            ui.copyLinkBtn.addEventListener('click', () => {
+                if(currentRoomUrl) {
+                    navigator.clipboard.writeText(currentRoomUrl).then(() => {
+                        showToast('Link copied to clipboard!', 'success');
+                    }).catch(() => {
+                        showToast('Failed to copy link.', 'error');
+                    });
+                }
+            });
+
+            ui.joinByIdBtn.addEventListener('click', () => {
+                const roomId = ui.roomIdInput.value.trim();
+                if (roomId) {
+                    showView('connecting');
+                    joinSpace(roomId);
+                } else {
+                    showToast('Please enter a Space ID', 'error');
+                }
+            });
+            
+            ui.roomIdInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const roomId = ui.roomIdInput.value.trim();
+                    if (roomId) {
+                        showView('connecting');
+                        joinSpace(roomId);
+                    } else {
+                        showToast('Please enter a Space ID', 'error');
+                    }
+                }
+            });
+
+            ui.fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) startFileTransfer(file);
+                ui.fileInput.value = ''; 
+            });
+
+            const dropZone = views.connected;
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                ui.dropOverlay.classList.remove('hidden');
+            }
+
+            function unhighlight(e) {
+                ui.dropOverlay.classList.add('hidden');
+            }
+
+            dropZone.addEventListener('drop', handleDrop, false);
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                startFileTransfer(files[0]);
+            }
+        }
+
+        // --- Core Functions ---
+        function createSpace() {
+            isHost = true;
+            const randomId = 'ts-' + Math.random().toString(36).substr(2, 9);
+            showView('host');
+            generateQRCode(randomId);
+            setTimeout(() => initPeer(randomId), 300);
+        }
+
+        function joinSpace(roomId) {
+            isHost = false;
+            connectionRetryCount = 0;
+            showView('connecting');
+            updateConnectionStatus('Initializing connection...');
+            
+            connectionTimeout = setTimeout(() => {
+                if (connectionRetryCount < MAX_RETRIES) {
+                    connectionRetryCount++;
+                    showToast(`Retry attempt ${connectionRetryCount}/${MAX_RETRIES}...`, 'warning');
+                    destroyPeer();
+                    setTimeout(() => initPeer(null, roomId), 1000);
+                } else {
+                    showToast('Connection timeout. Please check the Space ID and try again.', 'error');
+                    destroyPeer();
+                    showView('landing');
+                }
+            }, 20000);
+            
+            initPeer(null, roomId);
+        }
+
+        function initPeer(id, connectToId = null) {
+            console.log('Initializing peer with ID:', id || 'auto-generated');
+            
+            peer = new Peer(id, {
+                debug: 2,
+                config: {
+                    iceServers: ICE_SERVERS,
+                    sdpSemantics: 'unified-plan'
+                }
+            });
+
+            peer.on('open', (peerId) => {
+                myId = peerId;
+                console.log('✅ Peer connection opened. My ID:', myId);
+                updatePeerJSStatus('success', 'Connected');
+                updateSTUNStatus('success', 'Ready');
+                
+                if (isHost) {
+                    showToast('Space ready! Waiting for connection...', 'success');
+                } else if (connectToId) {
+                    updateConnectionStatus('Connecting to peer...');
+                    setTimeout(() => connectToPeer(connectToId), 1000);
+                }
+            });
+
+            peer.on('connection', (connection) => {
+                console.log('📞 Incoming connection from:', connection.peer);
+                updateP2PStatus('checking', 'Incoming connection...');
+                
+                if (conn && conn.open) {
+                    console.log('⚠️ Already connected, rejecting new connection');
+                    connection.close();
+                    return;
+                }
+                
+                setupConnection(connection);
+            });
+
+            peer.on('error', (err) => {
+                console.error('❌ PeerJS Error:', err.type, err);
+                clearTimeout(connectionTimeout);
+                
+                let errorMsg = 'Connection Error';
+                let shouldRetry = false;
+                
+                if (err.type === 'peer-unavailable') {
+                    errorMsg = 'Space not found. Please check the ID and try again.';
+                    updatePeerJSStatus('error', 'Peer not found');
+                } else if (err.type === 'network') {
+                    errorMsg = 'Network error. Retrying...';
+                    updatePeerJSStatus('error', 'Network issue');
+                    shouldRetry = true;
+                } else if (err.type === 'unavailable-id') {
+                    if (isHost) {
+                        console.log('ID taken, generating new one...');
+                        destroyPeer();
+                        createSpace();
+                        return;
+                    }
+                    errorMsg = 'This Space ID is already in use.';
+                } else if (err.type === 'server-error' || err.type === 'socket-error' || err.type === 'socket-closed') {
+                    errorMsg = 'Server connection failed. Retrying...';
+                    updatePeerJSStatus('error', 'Server error');
+                    shouldRetry = true;
+                } else {
+                    errorMsg = `Connection error: ${err.type}. Please try again.`;
+                    updatePeerJSStatus('error', 'Failed');
+                }
+                
+                showToast(errorMsg, 'error');
+                
+                if (shouldRetry && connectionRetryCount < MAX_RETRIES && !isHost) {
+                    connectionRetryCount++;
+                    setTimeout(() => {
+                        console.log(`Retry ${connectionRetryCount}/${MAX_RETRIES}`);
+                        destroyPeer();
+                        initPeer(null, connectToId);
+                    }, 2000);
+                } else if (!shouldRetry && !isHost) {
+                    setTimeout(() => {
+                        destroyPeer();
+                        showView('landing');
+                    }, 2000);
+                }
+            });
+
+            peer.on('disconnected', () => {
+                console.log('⚠️ Peer disconnected from server');
+                updatePeerJSStatus('warning', 'Reconnecting...');
+                if (peer && !peer.destroyed) {
+                    setTimeout(() => {
+                        if (peer && !peer.destroyed) {
+                            peer.reconnect();
+                        }
+                    }, 1000);
+                }
+            });
+
+            peer.on('close', () => {
+                console.log('Peer connection closed');
+            });
+        }
+
+        function connectToPeer(targetId) {
+            if (!peer || peer.destroyed) {
+                console.error('Peer not initialized');
+                showToast('Connection not ready. Please try again.', 'error');
+                showView('landing');
+                return;
+            }
+            
+            console.log('🔗 Attempting to connect to:', targetId);
+            updateP2PStatus('checking', 'Connecting...');
+            
+            try {
+                const connection = peer.connect(targetId, {
+                    reliable: true,
+                    metadata: { timestamp: Date.now() }
+                });
+                
+                if (!connection) {
+                    throw new Error('Failed to create connection object');
+                }
+                
+                connection.on('error', (err) => {
+                    console.error('Connection object error before open:', err);
+                });
+                
+                setupConnection(connection);
+            } catch (err) {
+                console.error('Error creating connection:', err);
+                showToast('Failed to initiate connection', 'error');
+                updateP2PStatus('error', 'Failed');
+                clearTimeout(connectionTimeout);
+                showView('landing');
+            }
+        }
+
+        function setupConnection(connection) {
+            conn = connection;
+            
+            conn.on('open', () => {
+                console.log('✅ P2P Connection established with:', conn.peer);
+                clearTimeout(connectionTimeout);
+                updateP2PStatus('success', 'Connected');
+                
+                setTimeout(() => {
+                    showView('connected');
+                    showToast('Connected successfully!', 'success');
+                    stopScanner();
+                }, 500);
+            });
+
+            conn.on('data', (data) => {
+                handleData(data);
+            });
+
+            conn.on('close', () => {
+                console.log('Connection closed by peer');
+                showToast('Peer disconnected.', 'error');
+                endSession(false);
+            });
+
+            conn.on('error', (err) => {
+                console.error('❌ Connection error:', err);
+                updateP2PStatus('error', 'Connection failed');
+                clearTimeout(connectionTimeout);
+                showToast('Connection error: ' + err.message, 'error');
+                setTimeout(() => {
+                    destroyPeer();
+                    showView('landing');
+                }, 2000);
+            });
+        }
+
+        function updateConnectionStatus(message) {
+            if (ui.connectingStatus) {
+                ui.connectingStatus.textContent = message;
+            }
+        }
+
+        function updatePeerJSStatus(status, message) {
+            if (ui.peerjsStatus) {
+                ui.peerjsStatus.textContent = message;
+                ui.peerjsStatus.className = `text-${status === 'success' ? 'green' : status === 'warning' ? 'orange' : 'red'}-500`;
+                if (status === 'success') {
+                    ui.peerjsStatus.classList.remove('status-pulse');
+                }
+            }
+        }
+
+        function updateSTUNStatus(status, message) {
+            if (ui.stunStatus) {
+                ui.stunStatus.textContent = message;
+                ui.stunStatus.className = `text-${status === 'success' ? 'green' : status === 'warning' ? 'orange' : 'red'}-500`;
+                if (status === 'success') {
+                    ui.stunStatus.classList.remove('status-pulse');
+                }
+            }
+        }
+
+        function updateP2PStatus(status, message) {
+            if (ui.p2pStatus) {
+                ui.p2pStatus.textContent = message;
+                ui.p2pStatus.className = `text-${status === 'success' ? 'green' : status === 'warning' ? 'orange' : 'red'}-500`;
+                if (status === 'success') {
+                    ui.p2pStatus.classList.remove('status-pulse');
+                }
+            }
+        }
+
+        function handleData(data) {
+            if (typeof data === 'object' && data.type) {
+                switch (data.type) {
+                    case 'chat':
+                        appendMessage(data.text, 'received');
+                        break;
+                    case 'file-start':
+                        handleFileStart(data);
+                        break;
+                    case 'file-chunk':
+                        handleFileChunk(data);
+                        break;
+                    case 'file-end':
+                        handleFileEnd();
+                        break;
+                }
+            }
+        }
+
+        function sendText() {
+            const text = ui.msgInput.value.trim();
+            if (!text || !conn || !conn.open) return;
+
+            // Store reference to input before sending
+            const inputElement = ui.msgInput;
+            const wasFocused = document.activeElement === inputElement;
+
+            try {
+                conn.send({ type: 'chat', text: text });
+                appendMessage(text, 'sent');
+                
+                // Clear input value
+                inputElement.value = '';
+                
+                // If input was focused (keyboard was open), keep it focused
+                if (wasFocused) {
+                    // Use requestAnimationFrame to ensure focus happens after value clear
+                    requestAnimationFrame(() => {
+                        inputElement.focus();
+                    });
+                }
+            } catch (err) {
+                console.error('Error sending message:', err);
+                showToast('Failed to send message', 'error');
+            }
+        }
+
+        function appendMessage(text, type) {
+            const div = document.createElement('div');
+            div.className = `flex w-full ${type === 'sent' ? 'justify-end' : 'justify-start'}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = `max-w-[80%] rounded-2xl px-4 py-2 shadow-sm message-bubble ${
+                type === 'sent' 
+                ? 'bg-blue-600 text-white rounded-br-none' 
+                : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'
+            }`;
+            bubble.innerText = text;
+            
+            div.appendChild(bubble);
+            ui.chatContainer.appendChild(div);
+            ui.chatContainer.scrollTop = ui.chatContainer.scrollHeight;
+        }
+
+        // --- File Transfer Logic ---
+        function startFileTransfer(file) {
+            if (file.size > MAX_FILE_SIZE) {
+                showToast('File too large (Max 100MB)', 'error');
+                return;
+            }
+            if (!conn || !conn.open) {
+                showToast('Connection not available', 'error');
+                return;
+            }
+
+            const progressId = 'upload-' + Date.now();
+            createProgressUI(progressId, file.name, 'Uploading...');
+            
+            try {
+                conn.send({
+                    type: 'file-start',
+                    name: file.name,
+                    size: file.size,
+                    mime: file.type
+                });
+            } catch (err) {
+                console.error('Error sending file start:', err);
+                showToast('Failed to start file transfer', 'error');
+                removeProgressUI(progressId);
+                return;
+            }
+
+            const reader = new FileReader();
+            let offset = 0;
+
+            function readNextChunk() {
+                if (!conn || !conn.open) {
+                    showToast('Connection lost during file transfer', 'error');
+                    removeProgressUI(progressId);
+                    return;
+                }
+
+                if (conn.dataChannel && conn.dataChannel.bufferedAmount > 8 * 1024 * 1024) {
+                    setTimeout(readNextChunk, 50);
+                    return;
+                }
+
+                const slice = file.slice(offset, offset + CHUNK_SIZE);
+                reader.readAsArrayBuffer(slice);
+            }
+
+            reader.onload = (e) => {
+                if (!conn || !conn.open) {
+                    showToast('Connection lost', 'error');
+                    removeProgressUI(progressId);
+                    return;
+                }
+                
+                try {
+                    conn.send({
+                        type: 'file-chunk',
+                        data: e.target.result
+                    });
+
+                    offset += e.target.result.byteLength;
+                    
+                    const percent = Math.round((offset / file.size) * 100);
+                    updateProgressUI(progressId, percent);
+
+                    if (offset < file.size) {
+                        setTimeout(readNextChunk, 0); 
+                    } else {
+                        conn.send({ type: 'file-end' });
+                        updateProgressUI(progressId, 100, 'Sent');
+                        appendFileMessage(file.name, file.size, 'sent');
+                        setTimeout(() => removeProgressUI(progressId), 2000);
+                    }
+                } catch (err) {
+                    console.error('Error sending file chunk:', err);
+                    showToast('File transfer failed', 'error');
+                    removeProgressUI(progressId);
+                }
+            };
+
+            reader.onerror = () => {
+                showToast('Error reading file', 'error');
+                removeProgressUI(progressId);
+            };
+
+            readNextChunk();
+        }
+
+        function handleFileStart(meta) {
+            incomingFile = {
+                buffer: [],
+                receivedSize: 0,
+                meta: meta,
+                active: true,
+                id: 'download-' + Date.now()
+            };
+            createProgressUI(incomingFile.id, meta.name, 'Downloading...');
+        }
+
+        function handleFileChunk(data) {
+            if (!incomingFile.active) return;
+
+            incomingFile.buffer.push(data.data);
+            incomingFile.receivedSize += data.data.byteLength;
+
+            const percent = Math.round((incomingFile.receivedSize / incomingFile.meta.size) * 100);
+            updateProgressUI(incomingFile.id, percent);
+        }
+
+        function handleFileEnd() {
+            if (!incomingFile.active) return;
+
+            const { buffer, meta, id } = incomingFile;
+            const blob = new Blob(buffer, { type: meta.mime || 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+
+            updateProgressUI(id, 100, 'Received');
+            appendFileMessage(meta.name, meta.size, 'received', url);
+            
+            setTimeout(() => removeProgressUI(id), 2000);
+            incomingFile = { active: false, buffer: [], receivedSize: 0, meta: null };
+        }
+
+        // --- UI Helpers for Files ---
+        function createProgressUI(id, filename, label) {
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'bg-gray-50 rounded-lg p-2 text-xs border border-gray-200';
+            div.innerHTML = `
+                <div class="flex justify-between mb-1">
+                    <span class="font-medium truncate max-w-[200px]">${filename}</span>
+                    <span class="text-gray-500 status-text">${label}</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-1.5">
+                    <div class="progress-bar bg-blue-600 h-1.5 rounded-full" style="width: 0%"></div>
+                </div>
+            `;
+            ui.fileProgressContainer.classList.remove('hidden');
+            ui.fileProgressContainer.appendChild(div);
+        }
+
+        function updateProgressUI(id, percent, text = null) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.querySelector('.progress-bar').style.width = percent + '%';
+                if (text) el.querySelector('.status-text').innerText = text;
+            }
+        }
+
+        function removeProgressUI(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+            if (ui.fileProgressContainer.children.length === 0) {
+                ui.fileProgressContainer.classList.add('hidden');
+            }
+        }
+
+        function appendFileMessage(filename, size, type, url = null) {
+            const div = document.createElement('div');
+            div.className = `flex w-full ${type === 'sent' ? 'justify-end' : 'justify-start'}`;
+            const sizeStr = formatBytes(size);
+            
+            let content = `
+                <div class="flex items-center gap-3">
+                    <div class="bg-gray-100 p-2 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="font-medium truncate">${filename}</p>
+                        <p class="text-xs text-gray-500">${sizeStr}</p>
+                    </div>
+                </div>
+            `;
+
+            if (url) {
+                content += `
+                    <a href="${url}" download="${filename}" class="mt-2 block text-center w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-2 rounded transition">
+                        Download
+                    </a>
+                `;
+            } else {
+                 content += `
+                    <div class="mt-1 text-right">
+                        <span class="text-[10px] text-blue-200 uppercase font-bold tracking-wider">Sent</span>
+                    </div>
+                `;
+            }
+            
+            const bubble = document.createElement('div');
+            bubble.className = `max-w-[80%] sm:max-w-[60%] rounded-xl p-3 shadow-sm ${
+                type === 'sent' 
+                ? 'bg-blue-600 text-white rounded-br-none' 
+                : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'
+            }`;
+            
+            if (type === 'sent') {
+                content = content.replace('bg-gray-100', 'bg-blue-500/30');
+                content = content.replace('text-gray-600', 'text-white');
+                content = content.replace('text-gray-500', 'text-blue-100');
+            }
+
+            bubble.innerHTML = content;
+            div.appendChild(bubble);
+            ui.chatContainer.appendChild(div);
+            ui.chatContainer.scrollTop = ui.chatContainer.scrollHeight;
+        }
+
+        // --- Utilities ---
+        function generateQRCode(id) {
+            ui.qrcode.innerHTML = '';
+            currentRoomUrl = `${window.location.origin}${window.location.pathname}?room=${id}`;
+            
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'qr-loading';
+            loadingDiv.innerHTML = '<div class="qr-spinner"></div>';
+            ui.qrcode.appendChild(loadingDiv);
+            
+            setTimeout(() => {
+                try {
+                    new QRCode(ui.qrcode, {
+                        text: currentRoomUrl,
+                        width: 180,
+                        height: 180,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H
+                    });
+                    
+                    const spinner = ui.qrcode.querySelector('.qr-loading');
+                    if (spinner) spinner.remove();
+                    
+                    ui.roomUrlDisplay.innerText = currentRoomUrl;
+                } catch (e) {
+                    console.error('QR Code generation error:', e);
+                    showToast('Failed to generate QR code', 'error');
+                }
+            }, 100);
+        }
+
+        function startScanner() {
+            showView('scanner');
+            
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
+            .catch(err => {
+                console.error('Camera error:', err);
+                showToast('Camera access denied or unavailable', 'error');
+                showView('landing');
+            });
+        }
+
+        function stopScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop()
+                    .then(() => {
+                        html5QrCode.clear();
+                        html5QrCode = null;
+                    })
+                    .catch(err => {
+                        console.error('Error stopping scanner:', err);
+                        html5QrCode = null;
+                    });
+            }
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            console.log('QR Code scanned:', decodedText);
+            stopScanner();
+            
+            try {
+                let roomId = '';
+                
+                if (decodedText.includes('?room=') || decodedText.includes('&room=')) {
+                    const url = new URL(decodedText);
+                    roomId = url.searchParams.get('room');
+                } else if (decodedText.startsWith('ts-')) {
+                    roomId = decodedText;
+                } else {
+                    const match = decodedText.match(/room=([^&\s]+)/);
+                    if (match) {
+                        roomId = match[1];
+                    }
+                }
+
+                if (roomId) {
+                    showView('connecting');
+                    updateConnectionStatus('Connecting to space...');
+                    joinSpace(roomId);
+                } else {
+                    showToast('Invalid QR Code format', 'error');
+                    showView('landing');
+                }
+            } catch (e) {
+                console.error('QR parse error:', e);
+                if (decodedText.startsWith('ts-')) {
+                    showView('connecting');
+                    updateConnectionStatus('Connecting to space...');
+                    joinSpace(decodedText);
+                } else {
+                    showToast('Invalid QR Code', 'error');
+                    showView('landing');
+                }
+            }
+        }
+
+        function onScanFailure(error) {
+            // Silently ignore
+        }
+
+        function endSession(reload = true) {
+            clearTimeout(connectionTimeout);
+            if (conn) conn.close();
+            if (peer) peer.destroy();
+            if (reload) {
+                window.location.href = window.location.pathname;
+            }
+        }
+
+        function destroyPeer() {
+            clearTimeout(connectionTimeout);
+            if (conn) {
+                conn.close();
+                conn = null;
+            }
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+            myId = null;
+        }
+
+        function showToast(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `px-4 py-2 rounded shadow-lg text-white text-sm flex items-center gap-2 pointer-events-auto ${
+                type === 'error' ? 'bg-red-600' : 
+                type === 'success' ? 'bg-green-600' : 
+                type === 'warning' ? 'bg-orange-500' : 'bg-gray-800'
+            }`;
+            div.innerText = msg;
+            ui.toastContainer.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (!+bytes) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        }
+
+        // Start App
+        init();
+
+        // --- PWA Service Worker Registration ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // --- PWA Install Prompt ---
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('💡 PWA install prompt available');
+            
+            // Show custom install button or toast
+            showToast('📲 Install TS Space as an app!', 'info');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ PWA installed successfully');
+            showToast('App installed successfully!', 'success');
+            deferredPrompt = null;
+        });
+    </script>
+</body>
+</html>
